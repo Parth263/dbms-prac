@@ -1,0 +1,131 @@
+I'll break down the code into executable blocks for MongoDB terminal.
+
+**BLOCK 1: Create Database and Switch to it**
+```javascript
+use student_db
+```
+
+**BLOCK 2: Insert Data**
+```javascript
+db.Stud.insertMany([
+    { Rollno: 1, Name: 'Ram', Marks: 80, Branch: 'Computer' },
+    { Rollno: 2, Name: 'Ravi', Marks: 90, Branch: 'Computer' },
+    { Rollno: 3, Name: 'Rahul', Marks: 70, Branch: 'IT' },
+    { Rollno: 4, Name: 'Sachin', Marks: 60, Branch: 'IT' }
+])
+```
+
+**BLOCK 3: Calculate Total Marks using Map-Reduce**
+```javascript
+db.Stud.mapReduce(
+    // Map function
+    function() {
+        emit(this.Branch, this.Marks);
+    },
+    // Reduce function
+    function(key, values) {
+        return Array.sum(values);
+    },
+    {
+        query: { "Marks": { $gt: 60 } },
+        out: "Total_Marks"
+    }
+)
+
+// View total marks results
+db.Total_Marks.find().pretty()
+```
+
+**BLOCK 4: Calculate Average Marks using Map-Reduce**
+```javascript
+db.Stud.mapReduce(
+    // Map function
+    function() {
+        emit(this.Branch, this.Marks);
+    },
+    // Reduce function
+    function(key, values) {
+        return Array.avg(values);
+    },
+    {
+        query: { "Marks": { $gt: 60 } },
+        out: "Avg_Marks"
+    }
+)
+
+// View average marks results
+db.Avg_Marks.find().pretty()
+```
+
+**BLOCK 5: View All Results**
+```javascript
+// View all collections
+show collections
+
+// View original data
+db.Stud.find().pretty()
+
+// View total marks
+db.Total_Marks.find().pretty()
+
+// View average marks
+db.Avg_Marks.find().pretty()
+```
+
+**BLOCK 6: Cleanup (if needed)**
+```javascript
+// Drop collections
+db.Stud.drop()
+db.Total_Marks.drop()
+db.Avg_Marks.drop()
+
+// Drop database
+db.dropDatabase()
+```
+
+Steps to Execute:
+1. Open MongoDB shell:
+```bash
+mongosh
+```
+
+2. Copy and paste each block in sequence
+3. Check results after each operation
+
+Expected Output will look like:
+
+For Total Marks:
+```javascript
+{
+    "_id" : "Computer",
+    "value" : 170  // Sum of marks for Computer branch
+}
+{
+    "_id" : "IT",
+    "value" : 70   // Sum of marks for IT branch
+}
+```
+
+For Average Marks:
+```javascript
+{
+    "_id" : "Computer",
+    "value" : 85   // Average marks for Computer branch
+}
+{
+    "_id" : "IT",
+    "value" : 70   // Average marks for IT branch
+}
+```
+
+Remember:
+- Execute blocks in order
+- Wait for each command to complete
+- Use .pretty() for formatted output
+- Check results after each operation
+
+Would you like me to:
+1. Show expected output for each block?
+2. Add error handling?
+3. Add more examples?
+4. Break down the blocks further?

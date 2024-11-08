@@ -1,0 +1,185 @@
+Let me explain MongoDB Aggregation and Indexing, then provide executable code blocks.
+
+**Explanation:**
+MongoDB Aggregation and Indexing involves:
+1. **Aggregation**: Processing data records and returning computed results
+   - Group values
+   - Perform operations on grouped data
+   - Analyze data changes over time
+
+2. **Indexing**: Improving query performance
+   - Single field indexes
+   - Compound indexes
+   - Text indexes
+
+Now, let's create executable code blocks:
+
+**BLOCK 1: Create Database and Collection**
+```javascript
+use school_db
+
+// Create collection
+db.createCollection("students")
+```
+
+**BLOCK 2: Insert Sample Data**
+```javascript
+db.students.insertMany([
+    {
+        name: "John",
+        age: 20,
+        grades: [85, 90, 87],
+        subjects: ["Math", "Science"],
+        year: 2,
+        fees_paid: 5000
+    },
+    {
+        name: "Alice",
+        age: 21,
+        grades: [92, 95, 88],
+        subjects: ["Physics", "Chemistry"],
+        year: 3,
+        fees_paid: 6000
+    },
+    {
+        name: "Bob",
+        age: 19,
+        grades: [78, 85, 80],
+        subjects: ["Math", "Biology"],
+        year: 2,
+        fees_paid: 4500
+    },
+    {
+        name: "Sarah",
+        age: 22,
+        grades: [95, 92, 96],
+        subjects: ["Chemistry", "Physics"],
+        year: 4,
+        fees_paid: 7000
+    }
+])
+```
+
+**BLOCK 3: Create Indexes**
+```javascript
+// Create single field index
+db.students.createIndex({ name: 1 })
+
+// Create compound index
+db.students.createIndex({ year: 1, age: 1 })
+
+// Create text index
+db.students.createIndex({ name: "text" })
+```
+
+**BLOCK 4: Basic Aggregation**
+```javascript
+// Calculate average age by year
+db.students.aggregate([
+    {
+        $group: {
+            _id: "$year",
+            averageAge: { $avg: "$age" },
+            count: { $sum: 1 }
+        }
+    }
+])
+```
+
+**BLOCK 5: Complex Aggregation**
+```javascript
+// Calculate statistics for grades
+db.students.aggregate([
+    {
+        $unwind: "$grades"
+    },
+    {
+        $group: {
+            _id: "$name",
+            averageGrade: { $avg: "$grades" },
+            maxGrade: { $max: "$grades" },
+            minGrade: { $min: "$grades" }
+        }
+    },
+    {
+        $sort: { averageGrade: -1 }
+    }
+])
+```
+
+**BLOCK 6: Pipeline Aggregation**
+```javascript
+db.students.aggregate([
+    // Stage 1: Match students in year 2
+    {
+        $match: { year: 2 }
+    },
+    // Stage 2: Group by subjects
+    {
+        $unwind: "$subjects"
+    },
+    {
+        $group: {
+            _id: "$subjects",
+            studentCount: { $sum: 1 },
+            totalFees: { $sum: "$fees_paid" }
+        }
+    },
+    // Stage 3: Sort by count
+    {
+        $sort: { studentCount: -1 }
+    }
+])
+```
+
+**BLOCK 7: Using Indexes**
+```javascript
+// Query using indexed field
+db.students.find({ name: "John" }).explain("executionStats")
+
+// Query using compound index
+db.students.find({ year: 2, age: { $gt: 19 } }).explain("executionStats")
+
+// Text search using index
+db.students.find({ $text: { $search: "John" } })
+```
+
+**BLOCK 8: View Indexes**
+```javascript
+// Show all indexes
+db.students.getIndexes()
+```
+
+**BLOCK 9: Cleanup (if needed)**
+```javascript
+// Drop indexes
+db.students.dropIndexes()
+
+// Drop collection
+db.students.drop()
+
+// Drop database
+db.dropDatabase()
+```
+
+To execute:
+1. Open MongoDB shell:
+```bash
+mongosh
+```
+
+2. Copy and paste each block sequentially
+3. Check results after each operation
+4. Use `.pretty()` for formatted output
+
+Remember:
+- Execute blocks in order
+- Verify each step
+- Indexes improve query performance but use storage
+- Aggregation pipeline processes data in stages
+
+Would you like me to:
+1. Add more complex aggregation examples?
+2. Show different types of indexes?
+3. Explain any specific block in detail?
+4. Add more data manipulation examples?

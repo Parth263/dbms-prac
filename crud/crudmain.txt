@@ -1,0 +1,109 @@
+// Create and switch to database
+use student_db
+
+// Create collection
+db.createCollection("students")
+
+// Insert single student
+db.students.insertOne({
+   name: "John Doe",
+   age: 21,
+   subjects: ["Math", "English"],
+   grade: "A",
+   active: true
+})
+
+// Insert multiple students
+db.students.insertMany([
+   {
+       name: "Alice Smith",
+       age: 22,
+       subjects: ["History", "Art"],
+       grade: "B",
+       active: true
+   },
+   {
+       name: "Bob Brown", 
+       age: 20,
+       subjects: ["Physics", "Chemistry"],
+       grade: "A",
+       active: false
+   }
+])
+
+// Find all students
+db.students.find()
+
+// Find with OR condition
+db.students.find({
+   $or: [
+       { grade: "A" },
+       { age: { $gt: 21 } }
+   ]
+})
+
+// Find with AND condition
+db.students.find({
+   $and: [
+       { active: true },
+       { subjects: "Math" }
+   ]
+})
+
+// Find with NOT condition
+db.students.find({
+   active: { $not: { $eq: true } }
+})
+
+// Update one student
+db.students.updateOne(
+   { name: "John Doe" },
+   { $set: { grade: "A+" } }
+)
+
+// Update many students
+db.students.updateMany(
+   { active: false },
+   { $set: { active: true } }
+)
+
+// Save method example
+let student = db.students.findOne({name: "John Doe"})
+db.students.save({
+   _id: student._id,
+   name: "John Doe",
+   age: 21,
+   subjects: ["Math", "English", "Physics"],
+   grade: "A+",
+   active: true
+})
+
+// Delete one student
+db.students.deleteOne({ name: "Bob Brown" })
+
+// Delete many students
+db.students.deleteMany({ active: false })
+
+// Verify data
+db.students.find().pretty()
+db.students.countDocuments()
+
+// Additional queries
+db.students.find().sort({ age: 1 })
+db.students.find().limit(2)
+db.students.find({ grade: "A+" }, { name: 1, grade: 1 })
+
+// Drop collection if needed
+db.students.drop()
+
+// Drop database if needed
+db.dropDatabase()
+
+// Show databases
+show dbs
+
+// Show collections
+show collections
+
+// Exit
+exit

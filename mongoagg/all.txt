@@ -1,0 +1,113 @@
+// Switch to or create the database
+use school_db
+
+// Create collection
+db.createCollection("students")
+
+// Insert sample data
+db.students.insertMany([
+    {
+        name: "John",
+        age: 20,
+        grades: [85, 90, 87],
+        subjects: ["Math", "Science"],
+        year: 2,
+        fees_paid: 5000
+    },
+    {
+        name: "Alice",
+        age: 21,
+        grades: [92, 95, 88],
+        subjects: ["Physics", "Chemistry"],
+        year: 3,
+        fees_paid: 6000
+    },
+    {
+        name: "Bob",
+        age: 19,
+        grades: [78, 85, 80],
+        subjects: ["Math", "Biology"],
+        year: 2,
+        fees_paid: 4500
+    },
+    {
+        name: "Sarah",
+        age: 22,
+        grades: [95, 92, 96],
+        subjects: ["Chemistry", "Physics"],
+        year: 4,
+        fees_paid: 7000
+    }
+])
+
+// Create indexes
+db.students.createIndex({ name: 1 })            // Single field index
+db.students.createIndex({ year: 1, age: 1 })    // Compound index
+db.students.createIndex({ name: "text" })       // Text index
+
+// Perform basic aggregation to calculate average age by year
+db.students.aggregate([
+    {
+        $group: {
+            _id: "$year",
+            averageAge: { $avg: "$age" },
+            count: { $sum: 1 }
+        }
+    }
+])
+
+// Perform complex aggregation to calculate grade statistics
+db.students.aggregate([
+    {
+        $unwind: "$grades"
+    },
+    {
+        $group: {
+            _id: "$name",
+            averageGrade: { $avg: "$grades" },
+            maxGrade: { $max: "$grades" },
+            minGrade: { $min: "$grades" }
+        }
+    },
+    {
+        $sort: { averageGrade: -1 }
+    }
+])
+
+// Pipeline aggregation to analyze students in year 2 by subject
+db.students.aggregate([
+    {
+        $match: { year: 2 }
+    },
+    {
+        $unwind: "$subjects"
+    },
+    {
+        $group: {
+            _id: "$subjects",
+            studentCount: { $sum: 1 },
+            totalFees: { $sum: "$fees_paid" }
+        }
+    },
+    {
+        $sort: { studentCount: -1 }
+    }
+])
+
+// Queries utilizing indexes
+db.students.find({ name: "John" }).explain("executionStats")
+db.students.find({ year: 2, age: { $gt: 19 } }).explain("executionStats")
+db.students.find({ $text: { $search: "John" } })
+
+// Show all indexes
+db.students.getIndexes()
+
+// Cleanup (if needed)
+// Drop indexes
+db.students.dropIndexes()
+
+// Drop collection
+db.students.drop()
+
+// Drop database
+db.dropDatabase()

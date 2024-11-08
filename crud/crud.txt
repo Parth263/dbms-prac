@@ -1,0 +1,180 @@
+I'll guide you through executing MongoDB queries step by step in the terminal.
+
+**BLOCK 1: Start MongoDB and Create Database**
+```bash
+# Start MongoDB (if not already running)
+brew services start mongodb-community@7.0
+
+# Connect to MongoDB shell
+mongosh
+```
+
+**BLOCK 2: Create and Use Database**
+```javascript
+// Create and switch to database
+use student_db
+
+// Create collection
+db.createCollection("students")
+```
+
+**BLOCK 3: Insert Operations (Create)**
+```javascript
+// Insert single student
+db.students.insertOne({
+    name: "John Doe",
+    age: 21,
+    subjects: ["Math", "English"],
+    grade: "A",
+    active: true
+})
+
+// Insert multiple students
+db.students.insertMany([
+    {
+        name: "Alice Smith",
+        age: 22,
+        subjects: ["History", "Art"],
+        grade: "B",
+        active: true
+    },
+    {
+        name: "Bob Brown",
+        age: 20,
+        subjects: ["Physics", "Chemistry"],
+        grade: "A",
+        active: false
+    }
+])
+```
+
+**BLOCK 4: Read Operations**
+```javascript
+// Find all students
+db.students.find()
+
+// Find with OR condition
+db.students.find({
+    $or: [
+        { grade: "A" },
+        { age: { $gt: 21 } }
+    ]
+})
+
+// Find with AND condition
+db.students.find({
+    $and: [
+        { active: true },
+        { subjects: "Math" }
+    ]
+})
+```
+
+**BLOCK 5: Update Operations**
+```javascript
+// Update one student
+db.students.updateOne(
+    { name: "John Doe" },
+    { $set: { grade: "A+" } }
+)
+
+// Update many students
+db.students.updateMany(
+    { active: false },
+    { $set: { active: true } }
+)
+```
+
+**BLOCK 6: Save Method**
+```javascript
+// First get an existing student's ID
+let student = db.students.findOne({name: "John Doe"})
+
+// Use save with that ID
+db.students.save({
+    _id: student._id,
+    name: "John Doe",
+    age: 21,
+    subjects: ["Math", "English", "Physics"],
+    grade: "A+",
+    active: true
+})
+```
+
+**BLOCK 7: Delete Operations**
+```javascript
+// Delete one student
+db.students.deleteOne({ name: "Bob Brown" })
+
+// Delete many students
+db.students.deleteMany({ active: false })
+```
+
+**BLOCK 8: Verify Data**
+```javascript
+// Show all students with nice formatting
+db.students.find().pretty()
+
+// Count documents
+db.students.countDocuments()
+```
+
+**Useful Commands During Execution:**
+```javascript
+// Show all databases
+show dbs
+
+// Show current database
+db
+
+// Show collections
+show collections
+
+// Clear screen in mongosh
+cls
+
+// Exit MongoDB shell
+exit
+```
+
+**Steps to Execute:**
+
+1. Open terminal and copy blocks in sequence
+2. Press Enter after each block
+3. Verify results after each operation
+
+**If You Need to Start Over:**
+```javascript
+// Drop collection
+db.students.drop()
+
+// Drop database
+db.dropDatabase()
+```
+
+Remember:
+- Commands are case-sensitive
+- Use `.pretty()` for formatted output
+- Wait for each command to complete before entering next
+- Check for errors after each operation
+
+Common Issues and Solutions:
+```javascript
+// If connection fails
+mongosh --port 27017
+
+// If need to see detailed output
+db.students.find().forEach(printjson)
+
+// If need to clear screen
+cls  // or clear
+
+// If need to cancel operation
+Ctrl + C
+```
+
+Would you like me to:
+1. Show more complex queries?
+2. Explain any specific operation?
+3. Show how to handle errors?
+4. Add more examples?
