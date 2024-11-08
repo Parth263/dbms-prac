@@ -1,0 +1,146 @@
+Let me break down the code and explain how to execute it correctly in MySQL terminal.
+
+**Code Explanation:**
+
+```sql
+-- 1. Create table to store radius and area
+CREATE TABLE AREAS(
+    RADIUS FLOAT,   -- To store the radius values
+    AREA FLOAT      -- To store the calculated areas
+);
+
+-- 2. Create procedure that calculates areas
+CREATE PROCEDURE FIND_CIRCLE_AREA()
+BEGIN
+    DECLARE R INT;      -- Declare variable for radius
+    DECLARE A FLOAT;    -- Declare variable for area
+    SET R = 5;          -- Initialize radius to 5
+    
+    loop_LABEL: LOOP    -- Start a labeled loop
+        IF R > 9 THEN   -- Exit condition
+            LEAVE loop_LABEL;
+        END IF;
+        
+        SET A = 3.14 * R * R;    -- Calculate area (πr²)
+        
+        -- Store radius and area in table
+        INSERT INTO AREAS(RADIUS, AREA) VALUES(R, A);
+        
+        SET R = R + 1;  -- Increment radius
+    END LOOP;
+END;
+
+-- The procedure will:
+-- 1. Calculate areas for circles with radius 5 to 9
+-- 2. Store each radius and its corresponding area in the AREAS table
+
+```
+
+**To execute this code, copy these blocks in sequence:**
+
+1. **First Block - Create Table:**
+```sql
+CREATE TABLE AREAS(
+    RADIUS FLOAT, 
+    AREA FLOAT
+);
+```
+
+2. **Second Block - Drop existing procedure if any:**
+```sql
+DROP PROCEDURE IF EXISTS FIND_CIRCLE_AREA;
+```
+
+3. **Third Block - Create Procedure:**
+```sql
+DELIMITER //
+CREATE PROCEDURE FIND_CIRCLE_AREA()
+BEGIN
+    DECLARE R INT;
+    DECLARE A FLOAT;
+    SET R = 5;
+    loop_LABEL: LOOP
+        IF R > 9 THEN
+            LEAVE loop_LABEL;
+        END IF;
+        SET A = 3.14 * R * R;
+        INSERT INTO AREAS(RADIUS, AREA) VALUES(R, A);
+        SET R = R + 1;
+    END LOOP;
+END //
+DELIMITER ;
+```
+
+4. **Fourth Block - Execute Procedure and View Results:**
+```sql
+CALL FIND_CIRCLE_AREA();
+SELECT * FROM AREAS;
+```
+
+**Step by Step Execution:**
+
+1. Open MySQL terminal:
+```bash
+mysql -u your_username -p
+```
+
+2. Create a database and use it:
+```sql
+CREATE DATABASE IF NOT EXISTS test_db;
+USE test_db;
+```
+
+3. Then copy and paste each block in sequence, pressing Enter after each block.
+
+**Expected Output:**
+```sql
+mysql> SELECT * FROM AREAS;
++--------+------------+
+| RADIUS | AREA       |
++--------+------------+
+|      5 |     78.50  |
+|      6 |    113.04  |
+|      7 |    153.86  |
+|      8 |    200.96  |
+|      9 |    254.34  |
++--------+------------+
+5 rows in set
+```
+
+**To verify at any point:**
+```sql
+-- Check if table exists
+SHOW TABLES;
+
+-- Check table structure
+DESCRIBE AREAS;
+
+-- Check if procedure exists
+SHOW PROCEDURE STATUS;
+
+-- Clear table if needed
+TRUNCATE TABLE AREAS;
+```
+
+**Common Issues and Solutions:**
+
+1. If you get "procedure already exists":
+```sql
+DROP PROCEDURE IF EXISTS FIND_CIRCLE_AREA;
+```
+
+2. If you get "table already exists":
+```sql
+DROP TABLE IF EXISTS AREAS;
+```
+
+3. If delimiter error occurs:
+```sql
+DELIMITER ;
+```
+
+Would you like me to:
+1. Explain any part in more detail?
+2. Show how to modify the radius range?
+3. Add error handling to the procedure?
+4. Show how to format the output differently?

@@ -1,0 +1,78 @@
+CREATE DATABASE bank_db;
+USE bank_db;
+
+CREATE TABLE Customer (
+    Account_no INT PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Balance DECIMAL(10, 2),
+    City VARCHAR(50)
+);
+
+CREATE TABLE Loan (
+    Loan_no INT PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Loan_Amount DECIMAL(10, 2)
+);
+
+INSERT INTO Customer (Account_no, Name, Balance, City) VALUES
+(1, 'Ram', 10000, 'Pune'),
+(2, 'Ravi', 25000, 'Nasik'),
+(3, 'Sachin', 30000, 'Mumbai');
+
+INSERT INTO Loan (Loan_no, Name, Loan_Amount) VALUES
+(1, 'Ram', 10000),
+(2, 'Ravi', 50000),
+(4, 'Dipak', 40000);
+
+CREATE VIEW High_Balance_Customers AS
+SELECT * FROM Customer 
+WHERE Balance > 20000;
+
+CREATE VIEW Nasik_High_Balance AS
+SELECT * FROM Customer 
+WHERE City = 'Nasik' AND Balance > 20000;
+
+CREATE INDEX idx_name ON Customer(Name);
+CREATE INDEX idx_acc_name ON Customer(Account_no, Name);
+
+CREATE SYNONYM LoanInfo FOR Loan;
+
+SELECT Name FROM Customer
+UNION
+SELECT Name FROM Loan;
+
+SELECT Name FROM Customer
+INTERSECT
+SELECT Name FROM Loan;
+
+SELECT Name FROM Customer
+MINUS
+SELECT Name FROM Loan;
+
+SELECT * FROM High_Balance_Customers;
+
+SELECT * FROM Nasik_High_Balance;
+
+SELECT * FROM Customer 
+ORDER BY Balance ASC;
+
+SELECT * FROM Loan 
+ORDER BY Loan_Amount DESC;
+
+SELECT Name, 
+       Loan_Amount as Principal,
+       (Loan_Amount * POWER(1 + 0.05, 20)) - Loan_Amount as Interest
+FROM LoanInfo;
+
+UPDATE Customer 
+SET Balance = Balance + 5000 
+WHERE Name = 'Ram';
+
+SELECT AVG(Loan_Amount) as Average_Loan 
+FROM Loan;
+
+SELECT * FROM Customer;
+SELECT * FROM Loan;
+
+COMMIT;
+

@@ -1,0 +1,170 @@
+Yes, you're right. Here's the complete solution starting with database creation. Copy and execute these blocks in sequence:
+
+**BLOCK 1: Create and Use Database**
+```sql
+CREATE DATABASE IF NOT EXISTS student_db;
+USE student_db;
+```
+
+**BLOCK 2: Create Tables**
+```sql
+DROP TABLE IF EXISTS Result;
+DROP TABLE IF EXISTS Stud_Marks;
+
+CREATE TABLE Stud_Marks (
+    Roll INT PRIMARY KEY,
+    name VARCHAR(50),
+    total_marks INT
+);
+
+CREATE TABLE Result (
+    Roll INT,
+    Name VARCHAR(50),
+    Class VARCHAR(50),
+    FOREIGN KEY (Roll) REFERENCES Stud_Marks(Roll)
+);
+```
+
+**BLOCK 3: Insert Sample Data**
+```sql
+INSERT INTO Stud_Marks (Roll, name, total_marks) VALUES
+(1, 'John Doe', 1200),
+(2, 'Jane Smith', 950),
+(3, 'Bob Wilson', 880),
+(4, 'Alice Brown', 1400),
+(5, 'Charlie Davis', 830);
+```
+
+**BLOCK 4: Create Procedure**
+```sql
+DELIMITER //
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    DECLARE v_finished INTEGER DEFAULT 0;
+    DECLARE v_roll INT;
+    DECLARE v_name VARCHAR(50);
+    DECLARE v_marks INT;
+    DECLARE v_class VARCHAR(50);
+    
+    -- Declare cursor
+    DECLARE stud_cursor CURSOR FOR 
+        SELECT Roll, name, total_marks 
+        FROM Stud_Marks;
+    
+    -- Declare NOT FOUND handler
+    DECLARE CONTINUE HANDLER FOR NOT FOUND 
+        SET v_finished = 1;
+    
+    -- Clear existing results
+    DELETE FROM Result;
+    
+    -- Open cursor
+    OPEN stud_cursor;
+    
+    get_stud: LOOP
+        FETCH stud_cursor INTO v_roll, v_name, v_marks;
+        
+        IF v_finished = 1 THEN
+            LEAVE get_stud;
+        END IF;
+        
+        -- Determine class based on marks
+        IF v_marks >= 990 AND v_marks <= 1500 THEN
+            SET v_class = 'Distinction';
+        ELSEIF v_marks >= 900 AND v_marks <= 989 THEN
+            SET v_class = 'First Class';
+        ELSEIF v_marks >= 825 AND v_marks <= 899 THEN
+            SET v_class = 'Higher Second Class';
+        ELSE
+            SET v_class = 'No Grade';
+        END IF;
+        
+        -- Insert into Result table
+        INSERT INTO Result (Roll, Name, Class)
+        VALUES (v_roll, v_name, v_class);
+        
+    END LOOP get_stud;
+    
+    -- Close cursor
+    CLOSE stud_cursor;
+    
+    -- Display results
+    SELECT * FROM Result;
+END //
+
+DELIMITER ;
+```
+
+**BLOCK 5: Execute and Test**
+```sql
+-- Execute procedure
+CALL proc_Grade();
+
+-- View detailed results
+SELECT 
+    s.Roll,
+    s.name,
+    s.total_marks,
+    r.Class
+FROM Stud_Marks s
+JOIN Result r ON s.Roll = r.Roll
+ORDER BY s.total_marks DESC;
+```
+
+To execute this:
+
+1. Open MySQL terminal:
+```bash
+mysql -u your_username -p
+```
+
+2. Copy and paste each block in sequence, waiting for each to complete before pasting the next block.
+
+3. Verify at any point:
+```sql
+-- Check database
+SHOW DATABASES;
+USE student_db;
+
+-- Check tables
+SHOW TABLES;
+
+-- Check data
+SELECT * FROM Stud_Marks;
+SELECT * FROM Result;
+
+-- Check procedure
+SHOW PROCEDURE STATUS;
+```
+
+Expected Output:
+```sql
+mysql> SELECT * FROM Result;
++------+---------------+----------------------+
+| Roll | Name          | Class               |
++------+---------------+----------------------+
+|    4 | Alice Brown   | Distinction         |
+|    1 | John Doe      | Distinction         |
+|    2 | Jane Smith    | First Class         |
+|    3 | Bob Wilson    | Higher Second Class |
+|    5 | Charlie Davis | Higher Second Class |
++------+---------------+----------------------+
+```
+
+If you get any errors:
+1. For "database exists":
+```sql
+DROP DATABASE IF EXISTS student_db;
+```
+
+2. For "procedure exists":
+```sql
+DROP PROCEDURE IF EXISTS proc_Grade;
+```
+
+Would you like me to:
+1. Add more error handling?
+2. Add more grade categories?
+3. Add reporting features?
+4. Explain any part in detail?

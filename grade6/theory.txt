@@ -1,0 +1,96 @@
+1. DATABASE CONCEPTS:
+
+A. Database Design Principles:
+   - Entity Relationship Model
+     * Stud_Marks (Primary Entity)
+     * Result (Dependent Entity)
+   - Normalization
+     * First Normal Form (1NF): Atomic values
+     * Second Normal Form (2NF): No partial dependencies
+     * Third Normal Form (3NF): No transitive dependencies
+
+B. Constraints:
+   - PRIMARY KEY: Roll number ensures unique student identification
+   - FOREIGN KEY: Maintains referential integrity between tables
+   - DEFAULT: Initial values for columns
+   - NOT NULL: Ensures required data is provided
+
+2. PL/SQL PROGRAMMING CONCEPTS:
+
+A. Variables and Data Types:
+   - Scalar Variables (Individual values)
+     * INT for numbers
+     * VARCHAR for text
+     * FLOAT for decimals
+   - Composite Variables (Multiple values)
+     * Cursors for result sets
+
+B. Control Structures:
+   - Loops
+     * LOOP: Basic iteration
+     * EXIT conditions
+   - Conditional Statements
+     * IF-THEN-ELSE: Grade determination
+     * CASE: Alternative for multiple conditions
+
+C. Cursor Operations:
+   - Declaration
+   - Opening
+   - Fetching
+   - Closing
+   - Error Handling
+
+3. STORED PROCEDURES:
+
+A. Advantages:
+   - Code Reusability
+   - Better Performance
+   - Reduced Network Traffic
+   - Enhanced Security
+   - Modular Programming
+
+B. Components:
+   - Parameter Handling
+   - Local Variables
+   - Business Logic
+   - Error Handling
+   - Result Processing
+
+4. ERROR HANDLING CONCEPTS:
+
+A. Types of Handlers:
+   - CONTINUE Handler
+   - EXIT Handler
+   - UNDO Handler
+
+B. Exception Types:
+   - System Defined
+   - User Defined
+   - Runtime Errors
+
+5. DATABASE OPERATIONS:
+
+A. DML (Data Manipulation Language):
+   - INSERT: Adding new records
+   - UPDATE: Modifying existing records
+   - DELETE: Removing records
+   - SELECT: Retrieving data
+
+B. DDL (Data Definition Language):
+   - CREATE: Making new objects
+   - ALTER: Modifying structure
+   - DROP: Removing objects
+   - TRUNCATE: Clearing data
+
+6. TRANSACTION MANAGEMENT:
+
+A. ACID Properties:
+   - Atomicity: All or nothing
+   - Consistency: Valid states
+   - Isolation: Concurrent access
+   - Durability: Permanent changes
+
+B. Operations:
+   - COMMIT: Save changes
+   - ROLLBACK: Undo changes
+   - SAVEPOINT: Partial rollback

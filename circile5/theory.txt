@@ -1,0 +1,81 @@
+1. DATABASE CONCEPTS:
+
+A. Table Structure:
+   - Table Name: AREAS
+   - Columns:
+     * RADIUS (FLOAT): Stores the radius value
+     * AREA (FLOAT): Stores the calculated area
+   - No Primary Key (as multiple records can have same values)
+   - Used for storing calculation results
+
+2. MATHEMATICAL CONCEPTS:
+
+A. Circle Area Formula:
+   - Formula: A = πr²
+   - Where:
+     * A = Area
+     * π (pi) = 3.14 (approximation)
+     * r = radius
+     * r² = radius squared
+
+B. Number Series:
+   - Sequence: 5, 6, 7, 8, 9
+   - Increment: +1
+   - Range: 5 to 9 (inclusive)
+
+3. PL/SQL PROGRAMMING CONCEPTS:
+
+A. Variable Declaration:
+   - DECLARE R INT: Integer for radius
+   - DECLARE A FLOAT: Float for area
+   - Purpose: Temporary storage during calculations
+
+B. Loop Structure:
+   - Labeled Loop (loop_LABEL)
+   - Components:
+     * Initialization (R = 5)
+     * Condition (R > 9)
+     * Increment (R = R + 1)
+     * Exit Condition (LEAVE)
+
+C. Data Types:
+   - INT: For whole numbers (radius)
+   - FLOAT: For decimal numbers (area)
+   - Purpose: Appropriate precision for calculations
+
+4. PROCEDURAL CONCEPTS:
+
+A. Stored Procedure:
+   - Name: FIND_CIRCLE_AREA
+   - Type: No parameters
+   - Purpose: Reusable code block
+
+B. Control Flow:
+   - Sequential execution
+   - Iterative processing
+   - Conditional branching
+
+5. DATABASE OPERATIONS:
+
+A. DDL (Data Definition Language):
+   - CREATE TABLE: Structure definition
+   - CREATE PROCEDURE: Code block creation
+
+B. DML (Data Manipulation Language):
+   - INSERT: Adding calculated values
+   - Variables to store temporary data
+
+6. ALGORITHMIC CONCEPTS:
+
+A. Algorithm Steps:
+   1. Initialize radius (R = 5)
+   2. Check if R > 9
+   3. If not, calculate area
+   4. Store values in table
+   5. Increment radius
+   6. Repeat steps 2-5 until R > 9
+
+B. Loop Properties:
+   - Entry Controlled
+   - Counter Controlled
+   - Finite Iterations

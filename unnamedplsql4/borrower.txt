@@ -1,0 +1,116 @@
+-- Step 1: Create Database and Tables
+CREATE DATABASE IF NOT EXISTS library_db;
+USE library_db;
+
+-- Create Borrower table
+CREATE TABLE borrower (
+    rollno INT PRIMARY KEY,
+    name VARCHAR(50),
+    dateofissue DATE,
+    name_of_book VARCHAR(100),
+    status VARCHAR(20) DEFAULT 'issued'
+);
+
+-- Create Fine table
+CREATE TABLE fine (
+    rollno INT,
+    date DATE,
+    amount DECIMAL(10,2),
+    FOREIGN KEY (rollno) REFERENCES borrower(rollno)
+);
+
+-- Step 2: Insert Sample Data
+INSERT INTO borrower (rollno, name, dateofissue, name_of_book) VALUES 
+(1, 'Prathamesh', DATE_SUB(CURDATE(), INTERVAL 40 DAY), 'Database Systems'),
+(2, 'Arjun', DATE_SUB(CURDATE(), INTERVAL 20 DAY), 'Java Programming'),
+(3, 'Mohit', DATE_SUB(CURDATE(), INTERVAL 10 DAY), 'Python Basics'),
+(4, 'Kshitij', DATE_SUB(CURDATE(), INTERVAL 25 DAY), 'Web Development');
+
+-- Step 3: Create Procedure for Fine Calculation
+DELIMITER //
+
+CREATE PROCEDURE calculate_fine(IN p_rollno INT)
+BEGIN
+    DECLARE v_issue_date DATE;
+    DECLARE v_days INT;
+    DECLARE v_fine_amount DECIMAL(10,2);
+    DECLARE v_book_status VARCHAR(20);
+
+    -- Get book issue details
+    SELECT dateofissue, status INTO v_issue_date, v_book_status
+    FROM borrower
+    WHERE rollno = p_rollno;
+
+    -- Check if book is already returned
+    IF v_book_status = 'returned' THEN
+        SELECT 'Book already returned' AS message;
+        RETURN;
+    END IF;
+
+    -- Calculate days
+    SET v_days = DATEDIFF(CURDATE(), v_issue_date);
+
+    -- Calculate fine based on days
+    IF v_days <= 15 THEN
+        SET v_fine_amount = 0;
+    ELSEIF v_days <= 30 THEN
+        SET v_fine_amount = (v_days - 15) * 5;
+    ELSE
+        SET v_fine_amount = (15 * 5) + ((v_days - 30) * 50);
+    END IF;
+
+    -- Insert fine record if applicable
+    IF v_fine_amount > 0 THEN
+        INSERT INTO fine (rollno, date, amount)
+        VALUES (p_rollno, CURDATE(), v_fine_amount);
+    END IF;
+
+    -- Update book status
+    UPDATE borrower
+    SET status = 'returned'
+    WHERE rollno = p_rollno;
+
+    -- Display results
+    SELECT 
+        b.rollno,
+        b.name,
+        b.name_of_book,
+        v_days AS days_kept,
+        CASE 
+            WHEN v_fine_amount > 0 THEN v_fine_amount
+            ELSE 0
+        END AS fine_amount
+    FROM borrower b
+    WHERE b.rollno = p_rollno;
+END //
+
+-- Create procedure to view all fines
+CREATE PROCEDURE view_all_fines()
+BEGIN
+    SELECT 
+        b.rollno,
+        b.name,
+        b.name_of_book,
+        b.dateofissue,
+        b.status,
+        f.amount as fine_amount,
+        f.date as fine_date
+    FROM borrower b
+    LEFT JOIN fine f ON b.rollno = f.rollno
+    ORDER BY b.rollno;
+END //
+
+DELIMITER ;
+
+-- Step 4: Example Usage Queries
+-- To calculate fine for a specific borrower:
+CALL calculate_fine(1);
+
+-- To view all fines:
+CALL view_all_fines();
+
+-- To check specific borrower details:
+SELECT * FROM borrower WHERE rollno = 1;
+
+-- To check fine details:
+SELECT * FROM fine WHERE rollno = 1;

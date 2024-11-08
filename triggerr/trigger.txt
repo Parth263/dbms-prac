@@ -1,0 +1,144 @@
+I'll provide the code blocks in sequence for executing the library audit trigger example.
+
+**BLOCK 1: Create Database and Use It**
+```sql
+CREATE DATABASE IF NOT EXISTS library_db;
+USE library_db;
+```
+
+**BLOCK 2: Create Main Table**
+```sql
+CREATE TABLE lib_book(
+    bid INT, 
+    bname VARCHAR(20), 
+    qty INT
+);
+```
+
+**BLOCK 3: Create Audit Table**
+```sql
+CREATE TABLE lib_audit(
+    bid INT, 
+    bname VARCHAR(20), 
+    qty INT
+);
+```
+
+**BLOCK 4: Insert Sample Data**
+```sql
+INSERT INTO lib_book(bid, bname, qty) 
+VALUES (1, "GOT", 10),
+       (2, "Harry", 20),
+       (3, "COTE", 30),
+       (4, "abc", 40);
+```
+
+**BLOCK 5: Create Delete Trigger**
+```sql
+DELIMITER //
+
+CREATE TRIGGER Make_audit1 
+AFTER DELETE ON lib_book
+FOR EACH ROW 
+BEGIN
+    INSERT INTO lib_audit(bid, bname, qty)
+    VALUES(OLD.bid, OLD.bname, OLD.qty);
+END //
+
+DELIMITER ;
+```
+
+**BLOCK 6: Create Update Trigger**
+```sql
+DELIMITER //
+
+CREATE TRIGGER make_audit2
+AFTER UPDATE ON lib_book
+FOR EACH ROW
+BEGIN
+    INSERT INTO lib_audit(bid, bname, qty)
+    VALUES(OLD.bid, OLD.bname, OLD.qty);
+END //
+
+DELIMITER ;
+```
+
+**BLOCK 7: Test Delete Trigger**
+```sql
+-- Check current data
+SELECT * FROM lib_book;
+
+-- Delete a record
+DELETE FROM lib_book WHERE bid=1;
+
+-- Check both tables
+SELECT * FROM lib_book;
+SELECT * FROM lib_audit;
+```
+
+**BLOCK 8: Test Update Trigger**
+```sql
+-- Update a record
+UPDATE lib_book 
+SET bname='harry potter' 
+WHERE bid=2;
+
+-- Check both tables
+SELECT * FROM lib_book;
+SELECT * FROM lib_audit;
+```
+
+**If you need to reset everything:**
+```sql
+-- Drop triggers
+DROP TRIGGER IF EXISTS Make_audit1;
+DROP TRIGGER IF EXISTS make_audit2;
+
+-- Drop tables
+DROP TABLE IF EXISTS lib_audit;
+DROP TABLE IF EXISTS lib_book;
+```
+
+Steps to Execute:
+
+1. Open MySQL terminal:
+```bash
+mysql -u root -p
+```
+
+2. Copy and paste each block in sequence, pressing Enter after each block.
+
+Expected Results:
+```sql
+-- After delete operation:
+mysql> SELECT * FROM lib_book;
++------+-------+------+
+| bid  | bname | qty  |
++------+-------+------+
+|    2 | Harry |   20 |
+|    3 | COTE  |   30 |
+|    4 | abc   |   40 |
++------+-------+------+
+
+mysql> SELECT * FROM lib_audit;
++------+-------+------+
+| bid  | bname | qty  |
++------+-------+------+
+|    1 | GOT   |   10 |
++------+-------+------+
+
+-- After update operation:
+mysql> SELECT * FROM lib_audit;
++------+--------------+------+
+| bid  | bname        | qty  |
++------+--------------+------+
+|    1 | GOT          |   10 |
+|    2 | Harry        |   20 |
++------+--------------+------+
+```
+
+Would you like me to:
+1. Explain any specific block in detail?
+2. Show how to test different scenarios?
+3. Add more trigger functionality?
+4. Show how to handle errors?

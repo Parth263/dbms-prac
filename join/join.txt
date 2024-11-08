@@ -1,0 +1,87 @@
+-- 1. Creating the Student_Mark table with primary key constraint
+CREATE TABLE Student_Mark (
+    Rollno INT PRIMARY KEY,
+    Name VARCHAR(50),
+    Marks INT,
+    Branch VARCHAR(20)
+);
+
+-- 2. Inserting records into Student_Mark table
+INSERT INTO Student_Mark VALUES
+(1, 'Ravi', 90, 'Computer'),
+(2, 'Vedika', 70, 'Computer'),
+(3, 'Aarush', 95, 'IT'),
+(4, 'Jyoti', 60, 'IT');
+
+-- 3. Display students having marks above 70
+SELECT * FROM Student_Mark 
+WHERE Marks > 70;
+
+-- 4. Display students having marks below 70
+SELECT * FROM Student_Mark 
+WHERE Marks < 70;
+
+-- 5. Display student having marks equal to 70 and name is Vedika
+SELECT * FROM Student_Mark 
+WHERE Marks = 70 AND Name = 'Vedika';
+
+-- 6. Update student name from Ravi to Sachin
+UPDATE Student_Mark 
+SET Name = 'Sachin' 
+WHERE Name = 'Ravi';
+
+-- 7. Delete student whose name is Aarush
+DELETE FROM Student_Mark 
+WHERE Name = 'Aarush';
+
+-- 8. Function to display student having maximum marks
+CREATE FUNCTION GetMaxMarksStudent()
+RETURNS TABLE
+AS
+RETURN (
+    SELECT * FROM Student_Mark 
+    WHERE Marks = (SELECT MAX(Marks) FROM Student_Mark)
+);
+
+-- 9. Display statistics grouped by branch
+SELECT 
+    Branch,
+    MIN(Marks) as MinimumMarks,
+    MAX(Marks) as MaximumMarks,
+    AVG(Marks) as AverageMarks,
+    SUM(Marks) as TotalMarks,
+    COUNT(*) as StudentCount
+FROM Student_Mark
+GROUP BY Branch;
+
+-- 10. Create a view for students with high marks (above 80)
+CREATE VIEW HighPerformers AS
+SELECT * FROM Student_Mark 
+WHERE Marks > 80;
+
+-- 11. Join example with a new table (for demonstration)
+CREATE TABLE Branch_Info (
+    Branch VARCHAR(20) PRIMARY KEY,
+    HOD VARCHAR(50),
+    Location VARCHAR(50)
+);
+
+INSERT INTO Branch_Info VALUES
+('Computer', 'Dr. Smith', 'Block A'),
+('IT', 'Dr. Johnson', 'Block B');
+
+-- Inner join to get student details with branch information
+SELECT 
+    sm.Rollno,
+    sm.Name,
+    sm.Marks,
+    sm.Branch,
+    bi.HOD,
+    bi.Location
+FROM Student_Mark sm
+INNER JOIN Branch_Info bi ON sm.Branch = bi.Branch;
+
+-- 12. Subquery example: Find students who scored above average marks
+SELECT *
+FROM Student_Mark
+WHERE Marks > (SELECT AVG(Marks) FROM Student_Mark);

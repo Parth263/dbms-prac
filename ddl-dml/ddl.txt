@@ -1,0 +1,197 @@
+I'll provide a complete solution for your problem statement. Let's break it down into parts:
+
+```sql
+-- First create database
+CREATE DATABASE bank_db;
+USE bank_db;
+
+-- Part A: DDL Statements
+-- 1. Create Customer table with constraints
+CREATE TABLE Customer (
+    Account_no INT PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Balance DECIMAL(10, 2) CHECK (Balance >= 0),
+    City VARCHAR(50)
+);
+
+-- 2. Create Loan table with constraints
+CREATE TABLE Loan (
+    Loan_no INT PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Loan_Amount DECIMAL(10, 2) CHECK (Loan_Amount > 0)
+);
+
+-- 3. Insert records into Customer table
+INSERT INTO Customer (Account_no, Name, Balance, City) VALUES
+(1, 'Ram', 10000, 'Pune'),
+(2, 'Ravi', 25000, 'Nasik'),
+(3, 'Sachin', 30000, 'Mumbai');
+
+-- 4. Insert records into Loan table
+INSERT INTO Loan (Loan_no, Name, Loan_Amount) VALUES
+(1, 'Ram', 10000),
+(2, 'Ravi', 50000),
+(4, 'Dipak', 40000);
+
+-- 5. Create view for high balance customers
+CREATE VIEW High_Balance_Customers AS
+SELECT * FROM Customer 
+WHERE Balance > 20000;
+
+-- 6. Create view for Nasik high balance customers
+CREATE VIEW Nasik_High_Balance AS
+SELECT * FROM Customer 
+WHERE City = 'Nasik' AND Balance > 20000;
+
+-- 7. Create index on Name column
+CREATE INDEX idx_name ON Customer(Name);
+
+-- 8. Create composite index
+CREATE INDEX idx_acc_name ON Customer(Account_no, Name);
+
+-- 9. Create synonym for Loan table
+CREATE SYNONYM LoanInfo FOR Loan;
+
+-- Part B: DML Queries
+
+-- 1. Select customers having account OR loan (UNION)
+SELECT Name FROM Customer
+UNION
+SELECT Name FROM Loan;
+
+-- 2. Select customers having both account AND loan (INTERSECT)
+SELECT Name FROM Customer
+INTERSECT
+SELECT Name FROM Loan;
+
+-- 3. Select customers having account but NO loan (MINUS/EXCEPT)
+SELECT Name FROM Customer
+MINUS
+SELECT Name FROM Loan;
+
+-- 4. Display high balance customers view
+SELECT * FROM High_Balance_Customers;
+
+-- 5. Display Nasik high balance customers view
+SELECT * FROM Nasik_High_Balance;
+
+-- 6. Display customers in ascending order of balance
+SELECT * FROM Customer 
+ORDER BY Balance ASC;
+
+-- 7. Display borrowers in descending order of loan amount
+SELECT * FROM Loan 
+ORDER BY Loan_Amount DESC;
+
+-- 8. Calculate interest for 20 years (5% interest rate)
+SELECT Name, 
+       Loan_Amount as Principal,
+       (Loan_Amount * POWER(1 + 0.05, 20)) - Loan_Amount as Interest
+FROM LoanInfo;
+
+-- Additional DML queries to meet 10 query requirement:
+
+-- 9. Update balance for a specific customer
+UPDATE Customer 
+SET Balance = Balance + 5000 
+WHERE Name = 'Ram';
+
+-- 10. Find average loan amount
+SELECT AVG(Loan_Amount) as Average_Loan 
+FROM Loan;
+
+-- 11. Find total balance by city
+SELECT City, SUM(Balance) as Total_Balance 
+FROM Customer 
+GROUP BY City;
+
+-- 12. Find customers with name starting with 'R'
+SELECT * FROM Customer 
+WHERE Name LIKE 'R%';
+```
+
+**To execute this in terminal:**
+
+1. First connect to your database:
+```bash
+mysql -u root -p
+```
+
+2. Then create and use database:
+```sql
+CREATE DATABASE bank_db;
+USE bank_db;
+```
+
+3. Copy and paste each section one by one:
+- First all CREATE TABLE statements
+- Then INSERT statements
+- Then CREATE VIEW statements
+- Then CREATE INDEX statements
+- Finally, execute the queries one by one
+
+**Expected Results:**
+
+1. UNION Query Result:
+```
+Name
+----
+Ram
+Ravi
+Sachin
+Dipak
+```
+
+2. INTERSECT Query Result:
+```
+Name
+----
+Ram
+Ravi
+```
+
+3. MINUS Query Result:
+```
+Name
+----
+Sachin
+```
+
+4. High Balance View Result:
+```
+Account_no    Name    Balance    City
+----------------------------------------
+2             Ravi    25000      Nasik
+3             Sachin  30000      Mumbai
+```
+
+5. Nasik High Balance View Result:
+```
+Account_no    Name    Balance    City
+----------------------------------------
+2             Ravi    25000      Nasik
+```
+
+**Important Notes:**
+1. Some commands might vary based on your SQL flavor:
+   - Use EXCEPT instead of MINUS for PostgreSQL/MySQL
+   - Synonym creation might not be supported in MySQL
+   - INTERSECT might not be supported in MySQL
+   
+2. To verify table creation:
+```sql
+SHOW TABLES;
+DESC Customer;
+DESC Loan;
+```
+
+3. To verify data:
+```sql
+SELECT * FROM Customer;
+SELECT * FROM Loan;
+```
+
+4. To verify indexes:
+```sql
+SHOW INDEX FROM Customer;
+```
