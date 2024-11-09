@@ -1,0 +1,7 @@
+mysql -h 192.168.2.232 -u TEB22 -p
+
+mongosh
+
+seat no : T1906904315
+
+PRN : 72251890M

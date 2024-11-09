@@ -1,0 +1,139 @@
+The SQL code you provided covers a range of core SQL concepts applied to a hypothetical bank database. Let's go through the theoretical background and concepts behind each part.
+
+### Part A: Database and Table Creation (DDL Statements)
+
+1. **Database Creation**
+   ```sql
+   CREATE DATABASE bank_db;
+   USE bank_db;
+   ```
+   - **Explanation**: The `CREATE DATABASE` command creates a new database called `bank_db`. After creating the database, `USE bank_db` switches to this database, so all subsequent operations apply to `bank_db`.
+
+2. **Table Creation with Constraints**
+   ```sql
+   CREATE TABLE Customer (
+       Account_no INT PRIMARY KEY,
+       Name VARCHAR(50) NOT NULL,
+       Balance DECIMAL(10, 2) CHECK (Balance >= 0),
+       City VARCHAR(50)
+   );
+   ```
+   - **Explanation**: This statement creates the `Customer` table, which has:
+     - `Account_no`: A unique account number, defined as a primary key (a unique identifier).
+     - `Name`: A required (`NOT NULL`) string of up to 50 characters.
+     - `Balance`: A decimal number with 10 digits in total and 2 decimal places. The `CHECK` constraint ensures the balance can’t be negative.
+     - `City`: An optional string representing the customer’s city.
+
+3. **Additional Table Creation**
+   ```sql
+   CREATE TABLE Loan (
+       Loan_no INT PRIMARY KEY,
+       Name VARCHAR(50) NOT NULL,
+       Loan_Amount DECIMAL(10, 2) CHECK (Loan_Amount > 0)
+   );
+   ```
+   - **Explanation**: The `Loan` table keeps track of customer loans, with:
+     - `Loan_no`: A primary key for each loan.
+     - `Name`: The name of the customer who took out the loan.
+     - `Loan_Amount`: The loan amount, which must be greater than 0.
+
+### Part B: Data Manipulation (DML Statements)
+
+1. **Inserting Data into Tables**
+   ```sql
+   INSERT INTO Customer (Account_no, Name, Balance, City) VALUES
+   (1, 'Ram', 10000, 'Pune'),
+   (2, 'Ravi', 25000, 'Nasik'),
+   (3, 'Sachin', 30000, 'Mumbai');
+   ```
+   - **Explanation**: The `INSERT INTO` command adds records to the `Customer` table. Each row represents a customer’s data, including their account number, name, balance, and city.
+
+2. **Creating Views**
+   ```sql
+   CREATE VIEW High_Balance_Customers AS
+   SELECT * FROM Customer 
+   WHERE Balance > 20000;
+   ```
+   - **Explanation**: A **view** is a saved SQL query that behaves like a virtual table. This `High_Balance_Customers` view filters customers with a balance greater than 20,000. Using views can simplify complex queries and improve data organization.
+
+3. **Creating Indexes**
+   ```sql
+   CREATE INDEX idx_name ON Customer(Name);
+   ```
+   - **Explanation**: **Indexes** are used to speed up data retrieval operations by reducing the amount of data that needs to be searched. This command creates an index on the `Name` column of the `Customer` table, which can improve performance when searching by name.
+
+4. **Creating a Synonym**
+   ```sql
+   CREATE SYNONYM LoanInfo FOR Loan;
+   ```
+   - **Explanation**: In some SQL implementations (like Oracle), a **synonym** is an alias for a table, which allows users to access the table using a different name. Here, `LoanInfo` becomes an alias for `Loan`.
+
+### Part C: SQL Queries (DML - Data Manipulation Language)
+
+1. **UNION Operation**
+   ```sql
+   SELECT Name FROM Customer
+   UNION
+   SELECT Name FROM Loan;
+   ```
+   - **Explanation**: The `UNION` operator combines results from two `SELECT` statements, removing duplicate names by default. This query returns a list of all unique customer names with either an account or a loan.
+
+2. **INTERSECT Operation**
+   ```sql
+   SELECT Name FROM Customer
+   INTERSECT
+   SELECT Name FROM Loan;
+   ```
+   - **Explanation**: The `INTERSECT` operator returns only names present in both `Customer` and `Loan` tables. This represents customers who have both an account and a loan.
+
+3. **EXCEPT/MINUS Operation**
+   ```sql
+   SELECT Name FROM Customer
+   MINUS
+   SELECT Name FROM Loan;
+   ```
+   - **Explanation**: The `MINUS` (or `EXCEPT` in some databases) operator returns names present in the `Customer` table but not in the `Loan` table, i.e., customers who have an account but no loan.
+
+4. **Ordering Results**
+   ```sql
+   SELECT * FROM Customer 
+   ORDER BY Balance ASC;
+   ```
+   - **Explanation**: The `ORDER BY` clause sorts query results. Here, customers are ordered by balance in ascending order (smallest to largest).
+
+5. **Calculating Compound Interest**
+   ```sql
+   SELECT Name, 
+          Loan_Amount as Principal,
+          (Loan_Amount * POWER(1 + 0.05, 20)) - Loan_Amount as Interest
+   FROM LoanInfo;
+   ```
+   - **Explanation**: This query calculates compound interest on each loan over 20 years at a 5% rate. It uses the formula \( A = P \times (1 + r)^n \), where `POWER()` computes the exponent.
+
+6. **Updating Data**
+   ```sql
+   UPDATE Customer 
+   SET Balance = Balance + 5000 
+   WHERE Name = 'Ram';
+   ```
+   - **Explanation**: This `UPDATE` statement modifies existing data. Here, it increases Ram’s balance by 5,000.
+
+7. **Aggregating Data**
+   ```sql
+   SELECT AVG(Loan_Amount) as Average_Loan 
+   FROM Loan;
+   ```
+   - **Explanation**: The `AVG()` function computes the average of the `Loan_Amount` column, providing a quick view of the average loan amount.
+
+### Key Concepts Summary
+
+- **Database and Table Creation**: Fundamental steps for creating a structured database and tables.
+- **Constraints**: Rules like `PRIMARY KEY`, `CHECK`, and `NOT NULL` ensure data integrity and validate entries.
+- **Views**: Virtual tables that store reusable queries, simplifying access to specific subsets of data.
+- **Indexes**: Data structures that improve query performance by enabling faster lookups on specified columns.
+- **UNION, INTERSECT, and MINUS**: Set operations that retrieve data based on overlapping or unique records across tables.
+- **Sorting and Aggregation**: `ORDER BY` sorts records, while aggregation functions (like `AVG`, `SUM`, etc.) summarize data.
+- **Update Operations**: Modify existing data to reflect new values, crucial for maintaining up-to-date information.
+- **Compound Interest Calculation**: Practical application of a financial formula, showcasing SQL's ability to handle calculations.
+
+Let me know if you'd like examples or further explanation on any particular concept!

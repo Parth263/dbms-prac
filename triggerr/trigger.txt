@@ -142,3 +142,154 @@ Would you like me to:
 2. Show how to test different scenarios?
 3. Add more trigger functionality?
 4. Show how to handle errors?
+
+
+
+
+
+This code demonstrates the use of **Triggers** in MySQL, specifically for maintaining an **audit trail** of changes (deletions and updates) to a table. Below is an explanation of the theory and concepts behind each part of the code:
+
+### 1. **Triggers in MySQL**
+A **trigger** is a special kind of stored procedure that is automatically executed or "triggered" by the database in response to specific events on a table or view. Triggers are primarily used for auditing, data validation, or automatic updates in response to database changes.
+
+In this case, the code is using two triggers to keep an audit trail of changes made to the `lib_book` table.
+
+### 2. **Steps Explained:**
+
+#### **BLOCK 1: Create Database and Use It**
+```sql
+CREATE DATABASE IF NOT EXISTS library_db;
+USE library_db;
+```
+- This block creates a new database `library_db` if it does not exist and then switches to that database. It ensures that the necessary database exists before proceeding with further operations.
+
+#### **BLOCK 2: Create Main Table (`lib_book`)**
+```sql
+CREATE TABLE lib_book(
+    bid INT, 
+    bname VARCHAR(20), 
+    qty INT
+);
+```
+- This block creates the `lib_book` table, which will store information about books in the library. The table has three columns:
+  - `bid`: The book's ID (integer).
+  - `bname`: The book's name (string).
+  - `qty`: The quantity of the book available in the library (integer).
+
+#### **BLOCK 3: Create Audit Table (`lib_audit`)**
+```sql
+CREATE TABLE lib_audit(
+    bid INT, 
+    bname VARCHAR(20), 
+    qty INT
+);
+```
+- This block creates the `lib_audit` table, which will store the historical changes of the `lib_book` table. The structure is the same as the `lib_book` table, as it will record the state of a book at the time of an update or deletion.
+
+#### **BLOCK 4: Insert Sample Data**
+```sql
+INSERT INTO lib_book(bid, bname, qty) 
+VALUES (1, "GOT", 10),
+       (2, "Harry", 20),
+       (3, "COTE", 30),
+       (4, "abc", 40);
+```
+- This block inserts four sample records into the `lib_book` table, representing books with their IDs, names, and quantities.
+
+#### **BLOCK 5: Create Delete Trigger**
+```sql
+DELIMITER //
+
+CREATE TRIGGER Make_audit1 
+AFTER DELETE ON lib_book
+FOR EACH ROW 
+BEGIN
+    INSERT INTO lib_audit(bid, bname, qty)
+    VALUES(OLD.bid, OLD.bname, OLD.qty);
+END //
+
+DELIMITER ;
+```
+- This block creates a **DELETE trigger** named `Make_audit1` on the `lib_book` table. The trigger is fired **after a row is deleted** from `lib_book`.
+  - `AFTER DELETE`: Specifies that this trigger will execute after a row is deleted.
+  - `FOR EACH ROW`: Indicates that the trigger will be fired for each deleted row.
+  - `INSERT INTO lib_audit`: This part of the trigger inserts the deleted record into the `lib_audit` table. The `OLD` keyword is used to reference the values of the columns before the deletion.
+  - The `DELIMITER //` and `DELIMITER ;` commands are used to change the statement delimiter temporarily, so MySQL doesn't interpret the semicolon in the body of the trigger as the end of the statement.
+
+#### **BLOCK 6: Create Update Trigger**
+```sql
+DELIMITER //
+
+CREATE TRIGGER make_audit2
+AFTER UPDATE ON lib_book
+FOR EACH ROW
+BEGIN
+    INSERT INTO lib_audit(bid, bname, qty)
+    VALUES(OLD.bid, OLD.bname, OLD.qty);
+END //
+
+DELIMITER ;
+```
+- This block creates an **UPDATE trigger** named `make_audit2` on the `lib_book` table. The trigger is fired **after a row is updated** in `lib_book`.
+  - `AFTER UPDATE`: Specifies that this trigger will execute after a row is updated.
+  - `FOR EACH ROW`: The trigger will fire for each row updated.
+  - Just like the DELETE trigger, the `INSERT INTO lib_audit` inserts the old values (before the update) into the `lib_audit` table.
+
+#### **BLOCK 7: Test Delete Trigger**
+```sql
+-- Check current data
+SELECT * FROM lib_book;
+
+-- Delete a record
+DELETE FROM lib_book WHERE bid=1;
+
+-- Check both tables
+SELECT * FROM lib_book;
+SELECT * FROM lib_audit;
+```
+- First, you check the current data in the `lib_book` table using `SELECT * FROM lib_book`.
+- Then, you perform a **DELETE** operation on the record with `bid=1`. The `Make_audit1` trigger will be activated, and the deleted record will be inserted into the `lib_audit` table.
+- Finally, you check both the `lib_book` and `lib_audit` tables to verify that the deletion was recorded in the `lib_audit` table.
+
+#### **BLOCK 8: Test Update Trigger**
+```sql
+-- Update a record
+UPDATE lib_book 
+SET bname='harry potter' 
+WHERE bid=2;
+
+-- Check both tables
+SELECT * FROM lib_book;
+SELECT * FROM lib_audit;
+```
+- In this block, you update the `bname` of the book with `bid=2` to `'harry potter'`. The `make_audit2` trigger will be activated, and the old value of the book's name (before the update) will be inserted into the `lib_audit` table.
+- After the update, you check both tables again to ensure the update was recorded in `lib_audit`.
+
+#### **Resetting Everything (Optional)**
+```sql
+-- Drop triggers
+DROP TRIGGER IF EXISTS Make_audit1;
+DROP TRIGGER IF EXISTS make_audit2;
+
+-- Drop tables
+DROP TABLE IF EXISTS lib_audit;
+DROP TABLE IF EXISTS lib_book;
+```
+- This block allows you to clean up your environment by dropping the triggers and tables you created. This is useful if you want to reset the example or if you're done testing.
+
+### 3. **Key Concepts:**
+
+- **Triggers**: Triggers are used to automatically execute code in response to changes in the database. They can respond to `INSERT`, `UPDATE`, or `DELETE` events on a table or view.
+  - **BEFORE triggers**: Execute before the database action (e.g., before inserting a record).
+  - **AFTER triggers**: Execute after the database action (e.g., after deleting a record).
+  
+- **Old and New Values**: In triggers, you can access the values before and after a modification using the `OLD` and `NEW` keywords.
+  - `OLD`: Refers to the value before the modification (used for DELETE and UPDATE).
+  - `NEW`: Refers to the value after the modification (used for INSERT and UPDATE).
+  
+- **Audit Tables**: An audit table is a separate table that records changes made to the primary data. In this example, the `lib_audit` table is used to store the deleted and old values of the records from `lib_book` to track changes for auditing purposes.
+
+- **DELIMITER**: In MySQL, the `DELIMITER` command is used to change the statement delimiter temporarily when creating stored procedures or triggers. By default, MySQL uses semicolons (`;`) to end statements, but triggers and stored procedures can contain multiple statements, so you need to change the delimiter to something else (like `//`) while creating them.
+
+### 4. **Conclusion**
+This example shows how to use triggers to automatically track changes to a table and store them in an audit table. This is useful for scenarios like tracking deletions or updates of important data, which is common in systems where data integrity and history are important (e.g., libraries, financial systems, etc.).

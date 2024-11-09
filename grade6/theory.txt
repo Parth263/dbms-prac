@@ -94,3 +94,201 @@ B. Operations:
    - COMMIT: Save changes
    - ROLLBACK: Undo changes
    - SAVEPOINT: Partial rollback
+
+
+
+
+
+
+
+
+
+
+   This code demonstrates key SQL concepts, including database creation, table relationships, conditional logic in procedures, and cursor usage for row-by-row processing. Here’s a breakdown of each part and the concepts behind it:
+
+---
+
+### **1. Database Creation and Selection**
+
+```sql
+CREATE DATABASE IF NOT EXISTS student_db;
+USE student_db;
+```
+
+- **Database**: A database stores structured information. `student_db` is created to contain tables related to student marks and results.
+- **IF NOT EXISTS**: This ensures the database is created only if it doesn’t already exist, preventing errors on repeat executions.
+
+---
+
+### **2. Table Creation and Relationships**
+
+```sql
+DROP TABLE IF EXISTS Result;
+DROP TABLE IF EXISTS Stud_Marks;
+
+CREATE TABLE Stud_Marks (
+    Roll INT PRIMARY KEY,
+    name VARCHAR(50),
+    total_marks INT
+);
+
+CREATE TABLE Result (
+    Roll INT,
+    Name VARCHAR(50),
+    Class VARCHAR(50),
+    FOREIGN KEY (Roll) REFERENCES Stud_Marks(Roll)
+);
+```
+
+- **Tables and Columns**: 
+  - `Stud_Marks` stores each student’s roll number, name, and total marks.
+  - `Result` stores student roll numbers, names, and classifications (`Class`) based on marks.
+- **Primary Key**: `Roll` uniquely identifies each student in `Stud_Marks`.
+- **Foreign Key**: `Result.Roll` is linked to `Stud_Marks.Roll`, creating a relationship between tables that ensures data consistency and referential integrity.
+
+---
+
+### **3. Inserting Sample Data**
+
+```sql
+INSERT INTO Stud_Marks (Roll, name, total_marks) VALUES
+(1, 'John Doe', 1200),
+(2, 'Jane Smith', 950),
+(3, 'Bob Wilson', 880),
+(4, 'Alice Brown', 1400),
+(5, 'Charlie Davis', 830);
+```
+
+- **Data Insertion**: Populating `Stud_Marks` with sample data allows testing of the grading procedure and results table. This data helps verify that the procedure is functioning correctly and assigning grades accurately.
+
+---
+
+### **4. Stored Procedure and Cursor Use**
+
+```sql
+DELIMITER //
+
+CREATE PROCEDURE proc_Grade()
+BEGIN
+    ...
+END //
+
+DELIMITER ;
+```
+
+- **Stored Procedure**: A stored procedure is a pre-defined set of SQL commands stored in the database. It allows you to encapsulate complex logic, making it easier to reuse and maintain.
+- **DELIMITER**: MySQL uses `;` as a default command delimiter. Since stored procedures involve multiple commands, `DELIMITER //` temporarily changes it to `//` to prevent premature termination of the procedure definition.
+
+---
+
+### **5. Declaring Variables and Cursors**
+
+```sql
+DECLARE v_finished INTEGER DEFAULT 0;
+DECLARE v_roll INT;
+DECLARE v_name VARCHAR(50);
+DECLARE v_marks INT;
+DECLARE v_class VARCHAR(50);
+
+DECLARE stud_cursor CURSOR FOR 
+    SELECT Roll, name, total_marks 
+    FROM Stud_Marks;
+```
+
+- **Variables**: `v_roll`, `v_name`, `v_marks`, and `v_class` store data for individual rows processed by the cursor.
+- **Cursor**: A cursor is a pointer to the result set of a query. It allows row-by-row processing within a stored procedure, which is necessary here because each student’s marks must be individually evaluated to assign a grade.
+
+---
+
+### **6. Cursor Handling and Loop Structure**
+
+```sql
+DECLARE CONTINUE HANDLER FOR NOT FOUND 
+    SET v_finished = 1;
+
+OPEN stud_cursor;
+
+get_stud: LOOP
+    FETCH stud_cursor INTO v_roll, v_name, v_marks;
+    
+    IF v_finished = 1 THEN
+        LEAVE get_stud;
+    END IF;
+```
+
+- **Error Handling**: `DECLARE CONTINUE HANDLER FOR NOT FOUND` sets `v_finished = 1` when there are no more rows to fetch. This prevents errors and indicates when to exit the loop.
+- **Loop**: The `LOOP` structure processes each row until the cursor reaches the end of the dataset.
+- **Conditional Exit**: `LEAVE get_stud` exits the loop when all rows are processed, indicated by `v_finished = 1`.
+
+---
+
+### **7. Conditional Logic for Grading**
+
+```sql
+IF v_marks >= 990 AND v_marks <= 1500 THEN
+    SET v_class = 'Distinction';
+ELSEIF v_marks >= 900 AND v_marks <= 989 THEN
+    SET v_class = 'First Class';
+ELSEIF v_marks >= 825 AND v_marks <= 899 THEN
+    SET v_class = 'Higher Second Class';
+ELSE
+    SET v_class = 'No Grade';
+END IF;
+```
+
+- **Conditional Statements**: This `IF-ELSEIF-ELSE` structure assigns a grade (`Class`) based on a student’s total marks:
+  - Marks ≥ 990 and ≤ 1500 → **Distinction**
+  - Marks ≥ 900 and < 990 → **First Class**
+  - Marks ≥ 825 and < 900 → **Higher Second Class**
+  - Anything lower → **No Grade**
+- **Range Checking**: Each condition checks if the marks fall within a specific range, and `v_class` is set accordingly.
+
+---
+
+### **8. Inserting Results and Closing the Cursor**
+
+```sql
+INSERT INTO Result (Roll, Name, Class)
+VALUES (v_roll, v_name, v_class);
+
+CLOSE stud_cursor;
+
+SELECT * FROM Result;
+```
+
+- **Inserting Data**: The procedure inserts the calculated `Class` into the `Result` table along with the student’s roll number and name.
+- **Closing the Cursor**: After all rows are processed, `CLOSE stud_cursor` releases resources used by the cursor.
+- **Result Display**: `SELECT * FROM Result;` shows the final classification for each student, helping verify the procedure’s correctness.
+
+---
+
+### **9. Testing and Final Verification**
+
+The final block runs the procedure and retrieves detailed results using a `JOIN` query:
+
+```sql
+CALL proc_Grade();
+
+SELECT 
+    s.Roll,
+    s.name,
+    s.total_marks,
+    r.Class
+FROM Stud_Marks s
+JOIN Result r ON s.Roll = r.Roll
+ORDER BY s.total_marks DESC;
+```
+
+- **Procedure Execution**: `CALL proc_Grade();` triggers the procedure, which calculates and stores grades in `Result`.
+- **Join Query for Display**: This query retrieves data from both tables, `Stud_Marks` and `Result`, allowing us to see each student’s marks alongside their assigned grade in descending order by marks.
+
+---
+
+### **Conceptual Summary**
+
+1. **Data Management**: This solution shows how to use tables, foreign keys, and primary keys to manage and relate data between tables.
+2. **Procedural Logic**: Stored procedures, variables, loops, and conditionals allow for detailed row-by-row data processing.
+3. **Error Handling**: `DECLARE CONTINUE HANDLER` with cursors is a way to handle the end of data in SQL without errors.
+4. **Reusable Automation**: Stored procedures are reusable, simplifying repetitive or complex data processing.
+
+This approach encapsulates the logic for calculating and classifying student marks within a single procedure, making the process efficient, consistent, and easy to maintain. Let me know if you'd like further clarification on any part!

@@ -190,3 +190,151 @@ The understanding of these theoretical concepts is crucial for:
 - Scalable solutions
 
 These concepts form the foundation for working with cursors in any database system, not just MySQL.
+
+
+
+
+This MySQL code implements the use of cursors and stored procedures to manage data between two tables. The steps are executed sequentially to create a database, define tables, insert data, and apply a cursor-based stored procedure for data migration. Here's a detailed explanation of the theory and concepts behind each section of the code:
+
+### **1. Database Creation and Usage**
+```sql
+CREATE DATABASE cursor_demo;
+USE cursor_demo;
+```
+**Concepts:**
+- **CREATE DATABASE**: This command creates a new database called `cursor_demo`. A database is a container for storing tables, views, and other database objects.
+- **USE database_name**: This command switches the active database to `cursor_demo`, so all subsequent operations will happen within this database.
+
+### **2. Table Creation for Original Roll Call**
+```sql
+CREATE TABLE O_RollCall (
+    rollno INT PRIMARY KEY,
+    name VARCHAR(30)
+);
+```
+**Concepts:**
+- **CREATE TABLE**: This command creates a table named `O_RollCall` in the database.
+- **Table Structure**: The table has two columns:
+  - `rollno`: An integer that serves as a primary key, ensuring that each student has a unique identifier.
+  - `name`: A string (up to 30 characters) to store the student's name.
+- **PRIMARY KEY**: The `rollno` column is marked as the primary key, which means each value must be unique and not null.
+
+### **3. Table Creation for New Roll Call**
+```sql
+CREATE TABLE N_RollCall (
+    n_rollno INT PRIMARY KEY,
+    n_name VARCHAR(30)
+);
+```
+- This is similar to the previous table creation, but this table (`N_RollCall`) will store data from the first table (`O_RollCall`) that does not exist in it already.
+- It also has two columns: `n_rollno` and `n_name`, both similar to the previous table's structure.
+
+### **4. Inserting Sample Data into O_RollCall**
+```sql
+INSERT INTO O_RollCall (rollno, name) 
+VALUES (1, "Piyush"), (2, "Vivek"), (3, "Kushal");
+```
+- **INSERT INTO**: This statement inserts three records into the `O_RollCall` table, each representing a student with a `rollno` and `name`.
+
+### **5. Drop Procedure if Exists**
+```sql
+DROP PROCEDURE IF EXISTS my_cursor;
+```
+**Concept:**
+- **DROP PROCEDURE**: This command is used to remove an existing stored procedure named `my_cursor` if it already exists. This ensures that we can redefine the procedure in the next block without any conflicts.
+
+### **6. Creating the Stored Procedure with Cursor**
+```sql
+DELIMITER //
+
+CREATE PROCEDURE my_cursor()
+BEGIN
+    DECLARE c_rollno INT;
+    DECLARE c_name VARCHAR(200);
+    DECLARE done INT DEFAULT 0;
+    
+    DECLARE update_cursor CURSOR FOR 
+        SELECT rollno, name 
+        FROM O_RollCall 
+        WHERE rollno NOT IN (SELECT n_rollno FROM N_RollCall);
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    
+    OPEN update_cursor;
+    
+    loop_label: LOOP
+        FETCH update_cursor INTO c_rollno, c_name;
+        
+        IF done = 1 THEN
+            LEAVE loop_label;
+        END IF;
+        
+        INSERT INTO N_RollCall(n_rollno, n_name) 
+        VALUES (c_rollno, c_name);
+    END LOOP;
+    
+    CLOSE update_cursor;
+END //
+
+DELIMITER ;
+```
+**Concepts:**
+
+1. **Stored Procedure**: A stored procedure (`my_cursor`) is a block of SQL code that is stored in the database and can be executed by the user. It helps in modularizing code and encapsulating complex logic.
+   
+2. **Cursor**:
+   - **DECLARE c_rollno INT, c_name VARCHAR(200)**: These are local variables that will hold data fetched from the cursor.
+   - **DECLARE update_cursor CURSOR FOR**: This creates a cursor named `update_cursor`. A cursor allows for row-by-row processing of query results. Here, the cursor retrieves the `rollno` and `name` from the `O_RollCall` table where the `rollno` is not present in the `N_RollCall` table. This prevents duplicate data in the second table.
+   - **DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1**: This is an exception handler that sets the variable `done` to `1` when the cursor has fetched all rows, signaling the loop to exit.
+   
+3. **Cursor Operations**:
+   - **OPEN update_cursor**: This opens the cursor, making it ready for fetching data.
+   - **FETCH update_cursor INTO c_rollno, c_name**: This command retrieves the next row of data from the cursor and stores the `rollno` and `name` values into the respective variables.
+   - **Loop**: The cursor continues fetching and inserting rows into the `N_RollCall` table until all rows are processed. If no more rows are found, the `done` flag is set to 1, and the loop exits using `LEAVE`.
+   - **INSERT INTO N_RollCall**: This inserts the `rollno` and `name` into the `N_RollCall` table.
+
+4. **Closing the Cursor**:
+   - **CLOSE update_cursor**: This closes the cursor after all rows have been processed, releasing any resources used by the cursor.
+
+### **7. Executing the Stored Procedure**
+```sql
+CALL my_cursor();
+```
+- **CALL**: This command is used to execute the stored procedure `my_cursor`. It triggers the cursor to fetch data from `O_RollCall` and insert it into `N_RollCall` if it's not already present.
+
+### **8. Viewing Results**
+```sql
+SELECT * FROM O_RollCall;
+SELECT * FROM N_RollCall;
+```
+- **SELECT**: These commands display the contents of the `O_RollCall` and `N_RollCall` tables, allowing you to see the result of the data transfer operation performed by the stored procedure.
+
+### **Optional Verification Commands:**
+```sql
+SHOW TABLES;
+DESC O_RollCall;
+DESC N_RollCall;
+SHOW PROCEDURE STATUS;
+```
+**Concepts:**
+- **SHOW TABLES**: Displays all tables in the current database, allowing verification of table creation.
+- **DESC table_name**: Shows the structure (columns and data types) of the specified table.
+- **SHOW PROCEDURE STATUS**: Shows a list of all stored procedures in the database, including the `my_cursor` procedure.
+
+### **Additional Test Cases:**
+The additional SQL commands allow you to test how the procedure handles new data. By adding a new record to the `O_RollCall` table and rerunning the procedure, you can verify if the procedure correctly updates the `N_RollCall` table with the new student.
+
+### **Key Concepts Recap:**
+
+1. **Cursors**: A cursor is a database object that allows row-by-row processing of SQL query results. It is useful when you need to perform operations on each row individually, such as in this case, transferring data between tables.
+
+2. **Stored Procedures**: A stored procedure is a precompiled SQL block that can execute multiple SQL statements. It helps improve performance by reducing the need to repeatedly send SQL queries from the client to the server.
+
+3. **Memory Management**: Cursors are resource-intensive objects, so proper management (opening, fetching, and closing) is essential to avoid memory and resource leaks.
+
+4. **ACID Transactions**: In database systems, transactions are expected to be Atomic, Consistent, Isolated, and Durable. This ensures the reliability and consistency of the database even in case of failures or interruptions.
+
+5. **Error Handling**: Using a `CONTINUE HANDLER` for `NOT FOUND` ensures that the procedure can gracefully exit once all rows are fetched from the cursor.
+
+### Conclusion:
+This code demonstrates how cursors and stored procedures can be used to manipulate and transfer data between tables in MySQL. The use of cursors in this case allows for efficient row-by-row operations, ensuring that only the necessary records are inserted into the target table. Proper error handling and resource management make the procedure robust and efficient.

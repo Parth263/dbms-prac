@@ -79,3 +79,65 @@ B. Loop Properties:
    - Entry Controlled
    - Counter Controlled
    - Finite Iterations
+
+
+
+
+
+
+   This code demonstrates the concepts of stored procedures, loops, conditionals, and basic arithmetic in SQL. Let’s break down the theory and concepts used in each part:
+
+### Key Concepts Used:
+
+1. **Stored Procedures**: 
+   - A stored procedure is a set of SQL statements stored in the database that can be executed as a single unit. It’s useful for performing repetitive tasks like calculations, data processing, or automated updates.
+   - In this code, `FIND_CIRCLE_AREA` is a stored procedure that calculates the area of a circle for different radius values and stores the results in a table.
+
+2. **Table Creation**:
+   - `CREATE TABLE` is used to define a structure to store specific data. Here, we create a table `AREAS` to store `RADIUS` and `AREA` values.
+   - The `FLOAT` data type is used for `RADIUS` and `AREA` to handle decimal values, which are common in geometric calculations.
+
+3. **Variables**:
+   - Variables are used within the procedure to hold temporary data for processing.
+   - In this case, `R` is used to hold each radius value, and `A` stores the calculated area.
+
+4. **Loops**:
+   - The `LOOP` structure allows repetitive execution of SQL statements. Here, it iterates over a range of radius values (from 5 to 9).
+   - Labeled loops, like `loop_LABEL:`, allow you to control where the loop begins and ends, and can also be referenced to exit the loop (`LEAVE loop_LABEL`).
+
+5. **Conditionals (IF Statements)**:
+   - `IF` statements let us apply conditional logic. In this code, `IF R > 9 THEN` is a condition that checks when to exit the loop.
+   - The loop continues until the condition `R > 9` becomes `TRUE`, which triggers the `LEAVE` statement to exit the loop.
+
+6. **Mathematical Calculation**:
+   - This code uses the formula for the area of a circle, `πr²`, where `π` (pi) is approximately 3.14.
+   - `SET A = 3.14 * R * R;` calculates the area based on the radius `R` and assigns the result to variable `A`.
+
+7. **Inserting Data**:
+   - `INSERT INTO` adds the calculated data into the `AREAS` table.
+   - Here, each radius and its corresponding area are stored as rows in `AREAS`.
+
+8. **Transaction Control with DELIMITER**:
+   - When creating stored procedures in MySQL, we use a custom delimiter, such as `DELIMITER //`, to distinguish the end of a procedure from regular SQL commands.
+   - This delimiter helps MySQL understand that `END //` marks the end of the stored procedure, and we reset the delimiter to `;` afterward.
+
+9. **Procedure Execution and Result Viewing**:
+   - Once the procedure is defined, it is executed using `CALL FIND_CIRCLE_AREA();`, which runs the code in the procedure.
+   - `SELECT * FROM AREAS;` is used to view the data in the `AREAS` table, showing the calculated radius-area pairs.
+
+### Breakdown of Code Execution:
+
+1. **Creating the Table**:
+   - We define the table structure to store `RADIUS` and `AREA` so that each calculated value can be saved for later viewing.
+
+2. **Creating and Defining the Procedure**:
+   - We define `FIND_CIRCLE_AREA` with a loop that increments the radius `R` from 5 to 9 and calculates the area each time.
+   - The calculated radius and area are inserted into `AREAS`, so each radius between 5 and 9 has a corresponding area.
+
+3. **Executing the Procedure and Viewing Results**:
+   - Running `CALL FIND_CIRCLE_AREA();` initiates the process, inserting five rows with radii 5 to 9 and their areas.
+   - `SELECT * FROM AREAS;` displays the stored data, letting you verify each radius and area pair.
+
+### Conceptual Summary
+
+This script illustrates core SQL concepts, including procedural programming, looping, conditional logic, and arithmetic operations, all within a database environment. Stored procedures encapsulate logic, allowing repetitive calculations without rewriting code. The use of tables to store calculated results helps make data accessible and organized. Overall, this approach showcases how SQL can be used for both data management and computations.
